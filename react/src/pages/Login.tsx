@@ -24,37 +24,45 @@ const Login: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!validation.email(formData.email)) {
-      showAlert.error(
-        "Email invalide",
-        "Veuillez entrer une adresse email valide"
-      );
-      return;
+  if (!validation.email(formData.email)) {
+    showAlert.error(
+      "Email invalide",
+      "Veuillez entrer une adresse email valide"
+    );
+    return;
+  }
+
+  if (!formData.password) {
+    showAlert.error("Erreur", "Veuillez entrer votre mot de passe");
+    return;
+  }
+
+  showAlert.loading("Connexion en cours...");
+
+  const { success, data } = await authService.login(formData);
+
+  Swal.close();
+
+  if (success && data?.token) {
+    localStorage.setItem("token", data.token);
+
+    // optionnel mais recommandé
+    if (data.user) {
+      localStorage.setItem("user", JSON.stringify(data.user));
     }
 
-    if (!formData.password) {
-      showAlert.error("Erreur", "Veuillez entrer votre mot de passe");
-      return;
-    }
+    await showAlert.success("Connecté !", "Bienvenue");
+    navigate("/dashboard");
+  } else {
+    showAlert.error(
+      "Erreur de connexion",
+      data?.message || "Identifiants invalides"
+    );
+  }
+};
 
-    showAlert.loading("Connexion en cours...");
-
-    const { success, data } = await authService.login(formData);
-
-    Swal.close();
-
-    if (success && data && typeof data === "object" && "token" in data) {
-      localStorage.setItem("token", (data && typeof data === "object" && "message" in data ? (data as { message: string }).message : null) || "Identifiants invalides");
-      await showAlert.success("Connecté !", "Bienvenue");
-      navigate("/dashboard");
-    } else {
-      showAlert.error(
-        "Erreur de connexion",
-        (data && typeof data === "object" && "message" in data ? (data as { message: string }).message : null) || "Identifiants invalides");
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-400 via-blue-500 to-purple-600 flex items-center justify-center p-4">

@@ -9,6 +9,22 @@ export interface LoginData {
   password: string;
 }
 
+export interface User {
+  email: string;
+  username: string;
+}
+
+/* Réponses API */
+export interface AuthSuccessResponse {
+  token: string;
+  user: User;
+}
+
+export interface ErrorResponse {
+  message: string;
+}
+
+/* Wrapper générique */
 export interface ApiResponse<T = unknown> {
   success: boolean;
   data: T;
